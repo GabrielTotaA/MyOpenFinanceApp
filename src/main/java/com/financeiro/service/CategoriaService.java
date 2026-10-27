@@ -1,0 +1,74 @@
+package com.financeiro.service;
+
+
+import com.financeiro.dto.CategoriaResponseDTO;
+import com.financeiro.exception.CategoriaEmUsoException;
+import com.financeiro.exception.CategoriaNaoEncontradaException;
+import com.financeiro.exception.CategoriaNaoPertenceAoUsuarioException;
+import com.financeiro.exception.UsuarioNaoEncontradoException;
+import com.financeiro.model.Categoria;
+import com.financeiro.model.Usuario;
+import com.financeiro.repository.CategoriaRepository;
+import com.financeiro.repository.TransacaoRepository;
+import com.financeiro.repository.UsuarioRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CategoriaService {
+
+
+    private final UsuarioRepository usuarioRepository;
+    private final CategoriaRepository repository;
+    private final TransacaoRepository transacaoRepository;
+    public CategoriaService(CategoriaRepository repository, UsuarioRepository usuarioRepository, TransacaoRepository transacaoRepository){
+        this.repository = repository;
+        this.usuarioRepository = usuarioRepository;
+        this.transacaoRepository = transacaoRepository;
+    }
+
+    public CategoriaResponseDTO criar(String nome, Long idUsuario){
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(() -> new UsuarioNaoEncontradoException("Erro ao cadastrar categoria"));
+        Categoria categoria = repository.save(new Categoria(nome,usuario));
+        return new CategoriaResponseDTO(categoria.getId(), categoria.getNome(), 0L);
+    }
+
+    public List<CategoriaResponseDTO> listarPorUsuario(Long idUsuario){
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado: " + idUsuario));
+        return repository.listarComTotalPorUsuario(usuario);
+    }
+
+    public void excluir(Long id, Long idUsuario){
+        Categoria categoria = buscarEditavel(id, idUsuario);
+        if (transacaoRepository.countByCategoria(categoria) > 0){
+            throw new CategoriaEmUsoException("Esta categoria tem transações. Mova ou exclua as transações antes de excluí-la");
+        }
+        try {
+            repository.delete(categoria);
+        } catch (DataIntegrityViolationException e){
+            throw new CategoriaEmUsoException("Esta categoria tem transações. Mova ou exclua as transações antes de excluí-la");
+        }
+    }
+
+    public CategoriaResponseDTO atualizar(Long id, Long idUsuario, String nome){
+        Categoria categoria = buscarEditavel(id, idUsuario);
+        categoria.renomear(nome);
+        repository.save(categoria);
+        return new CategoriaResponseDTO(categoria.getId(), categoria.getNome(), transacaoRepository.countByCategoria(categoria));
+    }
+
+    private Categoria buscarEditavel(Long id, Long idUsuario){
+        Categoria categoria = repository.findById(id)
+                .orElseThrow(() -> new CategoriaNaoEncontradaException("Categoria não encontrada: " + id));
+        if (categoria.getUsuario() == null){
+            throw new CategoriaNaoPertenceAoUsuarioException("Categorias compartilhadas não podem ser alteradas");
+        }
+        if (!categoria.getUsuario().getId().equals(idUsuario)){
+            throw new CategoriaNaoEncontradaException("Categoria não encontrada: " + id);
+        }
+        return categoria;
+    }
+}
