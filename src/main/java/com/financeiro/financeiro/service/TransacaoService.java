@@ -69,16 +69,28 @@ public class TransacaoService {
         return transacaoRepository.findByUsuario(usuario).stream().map(TransacaoResponseDTO::de).toList();
     }
 
+    public List<TransacaoResponseDTO> listarPorUsuario(Long idUsuario, LocalDate inicio, LocalDate fim) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado: " + idUsuario));
+        validarPeriodo(inicio, fim);
+        return transacaoRepository.findByUsuarioEPeriodo(usuario, inicio, fim).stream().map(TransacaoResponseDTO::de).toList();
+    }
+
     public ResumoDTO resumir(Long idUsuario, LocalDate inicio, LocalDate fim) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado: " + idUsuario));
-        if (inicio.isAfter(fim)) {
-            throw new PeriodoInvalidoException("A data inicial deve ser anterior ou igual à data final");
-        }
+        validarPeriodo(inicio, fim);
         List<ResumoCategoriaDTO> porCategoria = transacaoRepository.somarPorCategoria(usuario, inicio, fim);
         BigDecimal totalEntradas = somarPorTipo(porCategoria, TipoTransacao.ENTRADA);
         BigDecimal totalSaidas = somarPorTipo(porCategoria, TipoTransacao.SAIDA);
-        return new ResumoDTO(totalEntradas, totalSaidas, totalEntradas.subtract(totalSaidas), porCategoria);
+        BigDecimal saldo = transacaoRepository.calcularSaldoTotal(usuario);
+        return new ResumoDTO(totalEntradas, totalSaidas, saldo, porCategoria);
+    }
+
+    private void validarPeriodo(LocalDate inicio, LocalDate fim) {
+        if (inicio.isAfter(fim)) {
+            throw new PeriodoInvalidoException("A data inicial deve ser anterior ou igual à data final");
+        }
     }
 
     private BigDecimal somarPorTipo(List<ResumoCategoriaDTO> linhas, TipoTransacao tipo) {

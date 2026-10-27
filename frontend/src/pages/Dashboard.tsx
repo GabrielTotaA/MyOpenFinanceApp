@@ -44,7 +44,7 @@ export default function Dashboard() {
   const alturaSaidas = dados ? Math.max((dados.totalSaidas / maiorValor) * 200, 2) : 2;
 
   return (
-    <Layout title="Resumo financeiro" subtitle="Entradas, saídas e saldo do período selecionado">
+    <Layout title="Resumo financeiro" subtitle="Entradas e saídas do período selecionado, saldo total da conta">
       <div className="page-header" style={{ width: "100%", justifyContent: "space-between" }}>
         <div />
         <form className="period-filter" onSubmit={onAplicar}>
@@ -101,7 +101,7 @@ export default function Dashboard() {
               </div>
               <div className="table-divider" />
               <div className="chart-balance">
-                <span>Saldo do período:</span>
+                <span>Saldo total:</span>
                 <strong style={{ color: dados.saldo >= 0 ? "var(--color-income)" : "var(--color-expense)" }}>
                   {dados.saldo >= 0 ? "+ " : ""}
                   {formatarMoeda(dados.saldo)}

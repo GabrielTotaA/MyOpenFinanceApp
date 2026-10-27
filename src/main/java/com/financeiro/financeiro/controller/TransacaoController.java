@@ -1,6 +1,7 @@
 package com.financeiro.financeiro.controller;
 
 import com.financeiro.financeiro.config.UsuarioLogado;
+import com.financeiro.financeiro.exception.PeriodoInvalidoException;
 import com.financeiro.financeiro.dto.ResumoDTO;
 import com.financeiro.financeiro.dto.TransacaoRequestDTO;
 import com.financeiro.financeiro.dto.TransacaoAtualizacaoDTO;
@@ -42,8 +43,16 @@ public class TransacaoController {
     }
 
     @GetMapping
-    public List<TransacaoResponseDTO> listarPorUsuario(@AuthenticationPrincipal Jwt jwt){
-        return service.listarPorUsuario(UsuarioLogado.id(jwt));
+    public List<TransacaoResponseDTO> listarPorUsuario(@AuthenticationPrincipal Jwt jwt,
+                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date1,
+                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date2){
+        if (date1 == null && date2 == null) {
+            return service.listarPorUsuario(UsuarioLogado.id(jwt));
+        }
+        if (date1 == null || date2 == null) {
+            throw new PeriodoInvalidoException("Informe date1 e date2 juntos para filtrar por período");
+        }
+        return service.listarPorUsuario(UsuarioLogado.id(jwt), date1, date2);
     }
 
     @GetMapping("/resumo")

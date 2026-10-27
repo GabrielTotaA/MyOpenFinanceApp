@@ -88,12 +88,20 @@ class FluxoCompletoIntegracaoTest {
     }
 
     private String corpoTransacao(String valor, String tipo, long idCategoria){
-        return "{\"valor\":" + valor + ",\"data\":\"2026-10-05\",\"tipo\":\"" + tipo
+        return corpoTransacao(valor, tipo, idCategoria, "2026-10-05");
+    }
+
+    private String corpoTransacao(String valor, String tipo, long idCategoria, String data){
+        return "{\"valor\":" + valor + ",\"data\":\"" + data + "\",\"tipo\":\"" + tipo
                 + "\",\"idCategoria\":" + idCategoria + ",\"formaPagamento\":\"PIX\"}";
     }
 
     private long criarTransacao(String token, String valor, String tipo, long idCategoria) throws Exception {
-        MvcResult resultado = mvc.perform(json(post("/transacoes"), corpoTransacao(valor, tipo, idCategoria))
+        return criarTransacao(token, valor, tipo, idCategoria, "2026-10-05");
+    }
+
+    private long criarTransacao(String token, String valor, String tipo, long idCategoria, String data) throws Exception {
+        MvcResult resultado = mvc.perform(json(post("/transacoes"), corpoTransacao(valor, tipo, idCategoria, data))
                         .header("Authorization", bearer(token)))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -128,6 +136,32 @@ class FluxoCompletoIntegracaoTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.nome == 'Salario')].totalTransacoes").value(1))
                 .andExpect(jsonPath("$[?(@.nome == 'Mercado')].totalTransacoes").value(1));
+    }
+
+    @Test
+    void listarTransacoesFiltraPeloPeriodoESaldoConsideraTodasAsTransacoes() throws Exception {
+        String token = novoUsuarioComToken();
+        long categoria = criarCategoria(token, "Geral");
+        criarTransacao(token, "500.00", "ENTRADA", categoria, "2026-09-01"); // antes do período
+        long dentroDoPeriodo = criarTransacao(token, "100.00", "SAIDA", categoria, "2026-10-05");
+        criarTransacao(token, "50.00", "SAIDA", categoria, "2026-11-01"); // depois do período
+
+        mvc.perform(get("/transacoes").param("date1", "2026-10-01").param("date2", "2026-10-31")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(dentroDoPeriodo));
+
+        mvc.perform(get("/transacoes").param("date1", "2026-10-01")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isBadRequest());
+
+        mvc.perform(get("/transacoes/resumo").param("inicio", "2026-10-01").param("fim", "2026-10-31")
+                        .header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalEntradas").value(0))
+                .andExpect(jsonPath("$.totalSaidas").value(100.0))
+                .andExpect(jsonPath("$.saldo").value(350.0)); // 500 - 100 - 50, de TODAS as transações, não só do período
     }
 
     @Test

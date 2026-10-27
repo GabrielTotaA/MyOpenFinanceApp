@@ -159,6 +159,26 @@ class ControllersWebTest {
     }
 
     @Test
+    void listarComPeriodoFiltraPelasDatasInformadas() throws Exception {
+        when(transacaoService.listarPorUsuario(7L, DATA, DATA.plusDays(25))).thenReturn(List.of(transacaoExemplo()));
+
+        mvc.perform(logado(get("/transacoes").param("date1", "2026-10-05").param("date2", "2026-10-30")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+
+        verify(transacaoService).listarPorUsuario(7L, DATA, DATA.plusDays(25));
+        verify(transacaoService, never()).listarPorUsuario(7L);
+    }
+
+    @Test
+    void listarComApenasUmaDataDoPeriodoDa400() throws Exception {
+        mvc.perform(logado(get("/transacoes").param("date1", "2026-10-05"))).andExpect(status().isBadRequest());
+        mvc.perform(logado(get("/transacoes").param("date2", "2026-10-30"))).andExpect(status().isBadRequest());
+
+        verifyNoInteractions(transacaoService);
+    }
+
+    @Test
     void excluirEAtualizarPassamOIdDoTokenEDoRecurso() throws Exception {
         when(transacaoService.atualizar(eq(5L), eq(7L), any(), any(), any(), any(), any())).thenReturn(transacaoExemplo());
         when(categoriaService.atualizar(4L, 7L, "Novo")).thenReturn(new CategoriaResponseDTO(4L, "Novo", 0L));

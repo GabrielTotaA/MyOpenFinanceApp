@@ -220,6 +220,40 @@ class TransacaoServiceTest {
         verify(transacaoRepository, never()).delete(any(Transacao.class));
     }
 
+    // ---------- listar por período ----------
+
+    @Test
+    void listarPorUsuarioComPeriodoFiltraPelasDatas(){
+        Usuario u1 = usuario(1L);
+        Categoria cat = categoria(10L, u1);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(u1));
+        when(transacaoRepository.findByUsuarioEPeriodo(u1, DATA, DATA.plusDays(10)))
+                .thenReturn(List.of(transacao(5L, u1, cat)));
+
+        List<TransacaoResponseDTO> lista = service.listarPorUsuario(1L, DATA, DATA.plusDays(10));
+
+        assertThat(lista).hasSize(1);
+        assertThat(lista.get(0).id()).isEqualTo(5L);
+        verify(transacaoRepository, never()).findByUsuario(any());
+    }
+
+    @Test
+    void listarPorUsuarioComPeriodoInvertidoEhRecusado(){
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario(1L)));
+
+        assertThatThrownBy(() -> service.listarPorUsuario(1L, DATA.plusDays(1), DATA))
+                .isInstanceOf(PeriodoInvalidoException.class);
+        verify(transacaoRepository, never()).findByUsuarioEPeriodo(any(), any(), any());
+    }
+
+    @Test
+    void listarPorUsuarioComPeriodoEUsuarioInexistente(){
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.listarPorUsuario(1L, DATA, DATA))
+                .isInstanceOf(UsuarioNaoEncontradoException.class);
+    }
+
     // ---------- resumo ----------
 
     @Test
@@ -230,6 +264,7 @@ class TransacaoServiceTest {
                 new ResumoCategoriaDTO("Salário", TipoTransacao.ENTRADA, new BigDecimal("5000.00")),
                 new ResumoCategoriaDTO("Mercado", TipoTransacao.SAIDA, new BigDecimal("600.00")),
                 new ResumoCategoriaDTO("Lazer", TipoTransacao.SAIDA, new BigDecimal("250.50"))));
+        when(transacaoRepository.calcularSaldoTotal(u1)).thenReturn(new BigDecimal("4149.50"));
 
         ResumoDTO resumo = service.resumir(1L, DATA, DATA.plusDays(30));
 
@@ -240,10 +275,29 @@ class TransacaoServiceTest {
     }
 
     @Test
+    void resumirSaldoRefleteTodasAsTransacoesNaoApenasOPeriodoFiltrado(){
+        Usuario u1 = usuario(1L);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(u1));
+        when(transacaoRepository.somarPorCategoria(u1, DATA, DATA.plusDays(30))).thenReturn(List.of(
+                new ResumoCategoriaDTO("Salário", TipoTransacao.ENTRADA, new BigDecimal("5000.00")),
+                new ResumoCategoriaDTO("Mercado", TipoTransacao.SAIDA, new BigDecimal("600.00"))));
+        // saldo de todas as transações do usuário (histórico completo) é bem diferente do saldo do período (4400.00)
+        when(transacaoRepository.calcularSaldoTotal(u1)).thenReturn(new BigDecimal("-250.00"));
+
+        ResumoDTO resumo = service.resumir(1L, DATA, DATA.plusDays(30));
+
+        assertThat(resumo.totalEntradas()).isEqualByComparingTo("5000.00");
+        assertThat(resumo.totalSaidas()).isEqualByComparingTo("600.00");
+        assertThat(resumo.saldo()).isEqualByComparingTo("-250.00");
+        assertThat(resumo.saldo()).isNotEqualByComparingTo(resumo.totalEntradas().subtract(resumo.totalSaidas()));
+    }
+
+    @Test
     void resumirSemTransacoesDevolveZeros(){
         Usuario u1 = usuario(1L);
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(u1));
         when(transacaoRepository.somarPorCategoria(u1, DATA, DATA)).thenReturn(List.of());
+        when(transacaoRepository.calcularSaldoTotal(u1)).thenReturn(BigDecimal.ZERO);
 
         ResumoDTO resumo = service.resumir(1L, DATA, DATA);
 
