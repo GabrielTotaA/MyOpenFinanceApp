@@ -1,0 +1,110 @@
+.table-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.table-card__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+
+.table-card__title h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.table-header-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--color-bg);
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.table-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.table-divider {
+  height: 1px;
+  background: var(--color-border);
+  width: 100%;
+}
+
+.table-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.table-row__valor {
+  font-weight: 600;
+}
+
+.table-action {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 0;
+}
+
+.period-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.period-filter__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.period-filter__sep {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.period-filter input[type="date"] {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.form-card {
+  width: 380px;
+  flex-shrink: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}

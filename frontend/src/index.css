@@ -1,0 +1,46 @@
+:root {
+  --color-bg: #f5f7fa;
+  --color-sidebar: #0f1b2d;
+  --color-sidebar-text: #c9d3e3;
+  --color-surface: #ffffff;
+  --color-border: #e3e8ef;
+  --color-text: #1b2430;
+  --color-text-muted: #6b7787;
+  --color-primary: #2f6fed;
+  --color-primary-soft: #e8f0fe;
+  --color-income: #16a34a;
+  --color-income-soft: #dcfce7;
+  --color-expense: #dc2626;
+  --color-expense-soft: #fee2e2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+input,
+button,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}

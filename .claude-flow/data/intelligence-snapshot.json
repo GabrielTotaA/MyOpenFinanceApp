@@ -1,0 +1,95 @@
+[
+  {
+    "timestamp": 1792432658779,
+    "nodes": 9,
+    "edges": 36,
+    "pageRankSum": 1,
+    "confidences": [
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "accessCounts": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "topPatterns": [
+      {
+        "id": "insight-1792432658770-d1f5",
+        "summary": "Frequently edited: ControllersWebTest.java (5x)",
+        "confidence": 0.5,
+        "pageRank": 0.3164625247721691,
+        "accessCount": 0
+      },
+      {
+        "id": "insight-1792432658770-nqzz",
+        "summary": "Frequently edited: FluxoCompletoIntegracaoTest.java (4x)",
+        "confidence": 0.5,
+        "pageRank": 0.17106086633861192,
+        "accessCount": 0
+      },
+      {
+        "id": "insight-1792432658770-uts9",
+        "summary": "Frequently edited: TokenServiceTest.java (4x)",
+        "confidence": 0.5,
+        "pageRank": 0.12004272256421711,
+        "accessCount": 0
+      },
+      {
+        "id": "insight-1792432658770-g7qf",
+        "summary": "Frequently edited: AuthService.java (3x)",
+        "confidence": 0.5,
+        "pageRank": 0.0935397815531196,
+        "accessCount": 0
+      },
+      {
+        "id": "insight-1792432658770-23lw",
+        "summary": "Frequently edited: TransacaoController.java (5x)",
+        "confidence": 0.5,
+        "pageRank": 0.07714620554327042,
+        "accessCount": 0
+      },
+      {
+        "id": "insight-1792432658770-fj3m",
+        "summary": "Frequently edited: CategoriaController.java (5x)",
+        "confidence": 0.5,
+        "pageRank": 0.06593692104503884,
+        "accessCount": 0
+      },
+      {
+        "id": "insight-1792432658770-fdoe",
+        "summary": "Frequently edited: TransacaoService.java (6x)",
+        "confidence": 0.5,
+        "pageRank": 0.05775496105882802,
+        "accessCount": 0
+      },
+      {
+        "id": "insight-1792432658770-gur5",
+        "summary": "Frequently edited: CategoriaService.java (5x)",
+        "confidence": 0.5,
+        "pageRank": 0.05150123381143888,
+        "accessCount": 0
+      },
+      {
+        "id": "insight-1792432658770-d3hn",
+        "summary": "Frequently edited: GlobalExceptionHandler.java (4x)",
+        "confidence": 0.5,
+        "pageRank": 0.046554783313306175,
+        "accessCount": 0
+      }
+    ]
+  }
+]

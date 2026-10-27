@@ -1,0 +1,19 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge--income {
+  background: var(--color-income-soft);
+  color: var(--color-income);
+}
+
+.badge--expense {
+  background: var(--color-expense-soft);
+  color: var(--color-expense);
+}
